@@ -1,12 +1,6 @@
 import { Schema, model } from "mongoose";
 
 const userSchema = new Schema({
-  firstName: {
-    type: String,
-    required: true,
-  },
-  lastName: String,
-  bio: String,
   userName: {
     type: String,
     required: true,
@@ -27,18 +21,15 @@ const userSchema = new Schema({
     default: 'male',
     enum: ['male', 'female'],
   },
-  status:{
-    type: String,
-    default: 'offline',
-    enum: ['offline', 'online', 'away'],
-  },
   confirmEmail : {
     type : Boolean, 
     default: false,
   },
   phone: String,
-  profileImage: String,
-  coverImages: [String]
+  isDeleted: {
+    type : Boolean, 
+    default: false,
+  }
 }, {
   timestamps:true
 });
