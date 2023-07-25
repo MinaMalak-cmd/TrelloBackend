@@ -6,13 +6,10 @@ export const getAllUsers = async (req, res, next) => {
       {},
       {
         userName: 1,
-        firstName: 1,
-        lastName: 1,
         email: 1,
         phone: 1,
         age: 1,
         _id: 1,
-        password: 1,
       }
     );
     return res.json({ message: "Done", users });

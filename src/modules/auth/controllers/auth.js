@@ -4,13 +4,10 @@ import userModel from "../../../../DB/models/user.model.js";
 import { asyncHandler, SuccessResponse } from "../../../utils/errorHandling.js";
 
 export const signup = asyncHandler(async (req, res, next) => {
-  // try {
     const {
-      firstName,
-      lastName,
       userName,
-      password,
       email,
+      password,
       cPassword,
       age,
       gender,
@@ -18,9 +15,6 @@ export const signup = asyncHandler(async (req, res, next) => {
     } = req.body;
     if (password != cPassword) {
       return next(new Error("Password Mismatch cPassword" ))
-    }
-    if (!["male", "female"].includes(gender)) {
-      return next(new Error("Gender must be either male or female" ))
     }
     const checkMail = await userModel.findOne({ email });
     if (checkMail) return next(new Error("Email must be unique"))
@@ -31,11 +25,9 @@ export const signup = asyncHandler(async (req, res, next) => {
     const hashPassword = bcrypt.hashSync(password, parseInt(process.env.SALT_ROUND));
 
     const user = await userModel.create({
-      firstName,
-      lastName,
       userName,
-      password: hashPassword,
       email,
+      password: hashPassword,
       age,
       gender,
       phone,
