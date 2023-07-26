@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import jwt from 'jsonwebtoken';
 
 import userModel from "../../../../DB/models/user.model.js";
 import { asyncHandler, SuccessResponse } from "../../../utils/errorHandling.js";
@@ -34,23 +35,23 @@ export const signup = asyncHandler(async (req, res, next) => {
     });
     return SuccessResponse(res, { message: "Done", user }, 201)
 });
-export const login = async (req, res, next) => {
-  try {
+export const login = asyncHandler(async (req, res, next) => {
     const { userName, password, email, phone } = req.body;
     const user = await userModel.findOne({
       $or: [{ email }, { userName }, { phone }]
     });
     if (!user) {
-      return res.json({ message: "Email not exist" });
+      return next(new Error("Email not exist", { cause: 404 }));
     }
     const match = bcrypt.compareSync(password, user.password);
     if(!match){
-      return res.json({ message: "Please enter valid credentials" });
+      return next(new Error("In-valid login data", { cause: 400}))
     }
-    return res.json({
-      message: `Hi ${user.firstName} ${user.lastName}`
-    });
-  } catch (error) {
-    return res.json({ message: "Catch error" });
-  }
-};
+    const token = jwt.sign({ id: user._id }, process.env.TOKEN_SIGNATURE, { expiresIn : '10m'});
+    return SuccessResponse(res, {
+      message: `Hi ${user.userName}`,
+      accessToken : token 
+    }, 200)
+    
+});
+
