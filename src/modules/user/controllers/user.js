@@ -1,7 +1,7 @@
 import userModel from "../../../../DB/models/user.model.js";
+import { asyncHandler, SuccessResponse } from "../../../utils/errorHandling.js";
 
-export const getAllUsers = async (req, res, next) => {
-  try {
+export const getAllUsers = asyncHandler(async (req, res, next) => {
     const users = await userModel.find(
       {},
       {
@@ -12,30 +12,21 @@ export const getAllUsers = async (req, res, next) => {
         _id: 1,
       }
     );
-    return res.json({ message: "Done", users });
-  } catch (error) {
-    return error?.name === "CastError" && error?.kind === "ObjectId"
-      ? res.json({ message: "Invalid user id" })
-      : res.json({ message: "Catch error", error });
-  }
-};
-export const getUserProfile = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const user = await userModel.findById(id).populate([
-      {
-          path: "userId",
-      },
-  ]);
+    return SuccessResponse(res, { message: "Done", users }, 200);
+});
+
+export const getUserProfile = asyncHandler(async (req, res, next) => {
+  const reqUser = req.user;
+  const user = await userModel.findById(reqUser._id).select('-password');
     return user
-      ? res.json({ message: "Done", user })
-      : res.json({ message: "Not valid Id" });
-  } catch (error) {
-    return error?.name === "CastError" && error?.kind === "ObjectId"
-      ? res.json({ message: "Not valid Id" })
-      : res.json({ message: "Catch error" });
-  }
-};
+      ? SuccessResponse(res, { message: "Done", user }, 200) 
+      : SuccessResponse(res, { message: "Not valid Id" }, 200);
+});
+
+
+
+
+
 export const getByNameAndAge = async (req, res, next) => {
   try {
     const { name, age } = req.query;
@@ -91,7 +82,6 @@ export const getAgeBetween = async (req, res, next) => {
     return res.json({ message: "Catch error" });
   }
 };
-
 
 export const updateUser = async (req, res, next) => {
   try {

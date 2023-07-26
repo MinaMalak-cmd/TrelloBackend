@@ -45,7 +45,7 @@ export const login = asyncHandler(async (req, res, next) => {
     }
     const match = bcrypt.compareSync(password, user.password);
     if(!match){
-      return next(new Error("In-valid login data", { cause: 400}))
+      return next(new Error("In-valid login data", { cause: 400 }))
     }
     const token = jwt.sign({ id: user._id }, process.env.TOKEN_SIGNATURE, { expiresIn : '10m'});
     return SuccessResponse(res, {
