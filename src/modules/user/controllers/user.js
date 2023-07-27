@@ -109,7 +109,6 @@ export const updateUser = asyncHandler(async (req, res, next) => {
 export const softDelete = asyncHandler(async (req, res, next) => {
   // handle objectId cast error
   const { id } = req.params;
-  console.log("🚀 ~ file: user.js:112 ~ softDelete ~ id:", id)
   const user = await userModel.updateOne(
     { _id: id, isDeleted: false },
     {
