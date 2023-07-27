@@ -21,10 +21,10 @@ const taskSchema = new Schema({
   deadline: {
     type: Date
   },
-  assignTo : [{
+  assignTo : {
     type: Types.ObjectId,
     ref: "User"
-  }]
+  }
 
 }, {
   timestamps:true
