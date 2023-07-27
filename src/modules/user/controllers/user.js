@@ -23,10 +23,6 @@ export const getUserProfile = asyncHandler(async (req, res, next) => {
       : SuccessResponse(res, { message: "Not valid Id" }, 200);
 });
 
-
-
-
-
 // export const getByNameAndAge = async (req, res, next) => {
 //   try {
 //     const { name, age } = req.query;

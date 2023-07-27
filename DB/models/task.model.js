@@ -21,7 +21,7 @@ const taskSchema = new Schema({
   deadline: {
     type: Date
   },
-  assignTo : {
+  assignedUser : {
     type: Types.ObjectId,
     ref: "User"
   }
