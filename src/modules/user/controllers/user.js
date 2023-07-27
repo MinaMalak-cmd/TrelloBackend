@@ -27,66 +27,65 @@ export const getUserProfile = asyncHandler(async (req, res, next) => {
 
 
 
-export const getByNameAndAge = async (req, res, next) => {
-  try {
-    const { name, age } = req.query;
-    const users = await userModel.find(
-      {
-        userName: {
-          $regex: `^${name}`,
-          $options: "i",
-        },
-        age: {
-          $lt: age,
-        },
-      },
-      {
-        userName: 1,
-        firstName: 1,
-        lastName: 1,
-        age: 1,
-        email: 1,
-        phone: 1,
-        _id: 1,
-        password: 1,
-      }
-    );
-    return res.json({ message: "Done", users });
-  } catch (error) {
-    return res.json({ message: "Catch error" });
-  }
-};
-export const getAgeBetween = async (req, res, next) => {
-  try {
-    const { age1, age2 } = req.query;
-    const users = await userModel.find(
-      {
-        age: {
-          $gte: age1,
-          $lte: age2,
-        },
-      },
-      {
-        userName: 1,
-        firstName: 1,
-        lastName: 1,
-        age: 1,
-        email: 1,
-        phone: 1,
-        _id: 1,
-        password: 1,
-      }
-    );
-    return res.json({ message: "Done", users });
-  } catch (error) {
-    return res.json({ message: "Catch error" });
-  }
-};
+// export const getByNameAndAge = async (req, res, next) => {
+//   try {
+//     const { name, age } = req.query;
+//     const users = await userModel.find(
+//       {
+//         userName: {
+//           $regex: `^${name}`,
+//           $options: "i",
+//         },
+//         age: {
+//           $lt: age,
+//         },
+//       },
+//       {
+//         userName: 1,
+//         firstName: 1,
+//         lastName: 1,
+//         age: 1,
+//         email: 1,
+//         phone: 1,
+//         _id: 1,
+//         password: 1,
+//       }
+//     );
+//     return res.json({ message: "Done", users });
+//   } catch (error) {
+//     return res.json({ message: "Catch error" });
+//   }
+// };
+// export const getAgeBetween = async (req, res, next) => {
+//   try {
+//     const { age1, age2 } = req.query;
+//     const users = await userModel.find(
+//       {
+//         age: {
+//           $gte: age1,
+//           $lte: age2,
+//         },
+//       },
+//       {
+//         userName: 1,
+//         firstName: 1,
+//         lastName: 1,
+//         age: 1,
+//         email: 1,
+//         phone: 1,
+//         _id: 1,
+//         password: 1,
+//       }
+//     );
+//     return res.json({ message: "Done", users });
+//   } catch (error) {
+//     return res.json({ message: "Catch error" });
+//   }
+// };
 
-export const updateUser = async (req, res, next) => {
-  try {
+export const updateUser = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
-    const { firstName, lastName, age } = req.body;
+    const { userName, age, phone } = req.body;
     // const user = await userModel.findByIdAndUpdate(id,{
     //   firstName, lastName, age
     // }, {
@@ -95,33 +94,41 @@ export const updateUser = async (req, res, next) => {
     const user = await userModel.updateOne(
       { _id: id },
       {
-        firstName,
-        lastName,
-        age,
+        userName, 
+        age, 
+        phone
       },
       {
         new: true,
       }
     );
     return user.matchedCount
-      ? res.json({ message: "Done" })
-      : res.json({ message: "Invalid user id" });
-  } catch (error) {
-    return res.json({ message: "Catch error" });
-  }
-};
-export const deleteUser = async (req, res, next) => {
-  try {
-    const { id } = req.params;
+      ? SuccessResponse(res, { message: "Done"}, 200 )
+      : next(new Error("In valid user id", { cause: 404 }));
+});
+export const softDelete = asyncHandler(async (req, res, next) => {
+  // handle objectId cast error
+  const { id } = req.params;
+  console.log("🚀 ~ file: user.js:112 ~ softDelete ~ id:", id)
+  const user = await userModel.updateOne(
+    { _id: id, isDeleted: false },
+    {
+      isDeleted: true,
+    },
+    {
+      new: true,
+    }
+  );
+  return user.matchedCount
+    ? SuccessResponse(res, { message: "User has been deleted", }, 200 )
+    : next(new Error("In valid user id", { cause: 404 }));
+});
+export const deleteUser = asyncHandler(async (req, res, next) => {
 
+    const { id } = req.params;
     const user = await userModel.findByIdAndDelete(id);
 
     return user
-      ? res.json({ message: "Done" })
-      : res.json({ message: "Invalid user id" });
-  } catch (error) {
-    return error?.name === "CastError" && error?.kind === "ObjectId"
-      ? res.json({ message: "Invalid user id" })
-      : res.json({ message: "Catch error" });
-  }
-};
+      ? SuccessResponse(res, { message: "Done" }, 200)
+      : next(new Error("In valid user id", { cause: 404 }));
+});
