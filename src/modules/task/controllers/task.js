@@ -118,3 +118,26 @@ export const getAllTasksForAnyUser = asyncHandler(async (req, res, next) => {
     ]);
   return SuccessResponse(res, { message: "Done", tasks }, 200);
 });
+
+export const getTasksPassedDeadline = asyncHandler(async (req, res, next) => {
+  const currentDate = new Date().toISOString();
+  const tasks = await taskModel
+    .find({
+      deadline: { $lte: currentDate },
+      $or: [ 
+        { status: 'toDo' }, 
+        { status: 'doing' } 
+      ] 
+    })
+    .populate([
+      {
+        path: "userId",
+        select: "userName email phone",
+      },
+      {
+        path: "assignedUser",
+        select: "userName email phone",
+      },
+    ]);
+  return SuccessResponse(res, { message: "Done", tasks }, 200);
+});
