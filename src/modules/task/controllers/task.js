@@ -8,7 +8,6 @@ export const addTask = asyncHandler(async (req, res, next) => {
   if (!["toDo", "doing", "done"].includes(status)) {
     return next(new Error("Wrong value for status", { cause: 404 }));
   }
-
   const task = await taskModel.create({
     title,
     description,
@@ -73,4 +72,23 @@ export const deleteTask = asyncHandler(async (req, res, next) => {
   return deletedTask.deletedCount
     ? SuccessResponse(res, { message: "Done"}, 200 )
     : next(new Error("In valid task id", { cause: 404 }));
+});
+
+
+export const getAllTasksForCurrentUser = asyncHandler(async (req, res, next) => {
+  const reqUser = req.user;
+  console.log("🚀 ~ file: task.js:80 ~ getAllTasksForCurrentUser ~ reqUser:", reqUser)
+  console.log("🚀 ~ file: task.js:80 ~ getAllTasksForCurrentUser ~ reqUser:", reqUser)
+  const tasks = await taskModel.find({
+   userId: reqUser._id
+  }).populate([{
+    path: "userId",
+    select: "userName email phone",
+  },
+  {
+    path: "assignedUser",
+    select: "userName email phone",
+  }
+]);
+  return SuccessResponse(res, { message: "Done", tasks }, 200);
 });

@@ -56,8 +56,7 @@ export const login = asyncHandler(async (req, res, next) => {
 });
 
 export const changePassword = asyncHandler(async (req, res, next) => {
-  const { password } = req.body;
-  const reqUser = req.user;
+  const { password, email } = req.body;
   if (!password) {
     return next(new Error("Missing param", { cause: 400 }));
   }
@@ -67,7 +66,7 @@ export const changePassword = asyncHandler(async (req, res, next) => {
   );
 
   const user = await userModel.updateOne(
-    { _id: reqUser._id },
+    { email: email },
     {
       password: hashPassword,
     },
@@ -77,5 +76,5 @@ export const changePassword = asyncHandler(async (req, res, next) => {
   );
   return user.matchedCount
     ? SuccessResponse(res, { message: "your password has been updated" }, 200)
-    : next(new Error("In valid user id", { cause: 404 }));
+    : next(new Error("In valid Email", { cause: 404 }));
 });
