@@ -43,7 +43,7 @@ export const login = asyncHandler(async (req, res, next) => {
     return next(new Error("In-valid login data", { cause: 400 }));
   }
   const token = jwt.sign({ id: user._id }, process.env.TOKEN_SIGNATURE, {
-    expiresIn: "10m",
+    expiresIn: "30m",
   });
   return SuccessResponse(
     res,
