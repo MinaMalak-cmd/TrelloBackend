@@ -19,15 +19,16 @@ export const addTask = asyncHandler(async (req, res, next) => {
 });
 
 export const getAllTasksWithUserData = asyncHandler(async (req, res, next) => {
-  const tasks = await taskModel.find({}).populate([{
-    path: "userId",
-    select: "userName email phone",
-  },
-  {
-    path: "assignedUser",
-    select: "userName email phone",
-  }
-]);
+  const tasks = await taskModel.find({}).populate([
+    {
+      path: "userId",
+      select: "userName email phone",
+    },
+    {
+      path: "assignedUser",
+      select: "userName email phone",
+    },
+  ]);
   return SuccessResponse(res, { message: "Done", tasks }, 200);
 });
 
@@ -39,56 +40,81 @@ export const updateTask = asyncHandler(async (req, res, next) => {
     return next(new Error("Wrong value for status", { cause: 404 }));
   }
   const task = await taskModel.findById({ _id: id });
-  if(!task) return next(new Error("In valid-id", { cause: 404 }));
-  if(task?.userId?.toString() != reqUser._id) return next(new Error("Only owner can update this task", { cause: 404 }));
-  if(!assignedUser) return next(new Error("Please enter assigned user", { cause: 404 }));
+  if (!task) return next(new Error("In valid-id", { cause: 404 }));
+  if (task?.userId?.toString() != reqUser._id)
+    return next(new Error("Only owner can update this task", { cause: 404 }));
+  if (!assignedUser)
+    return next(new Error("Please enter assigned user", { cause: 404 }));
   const selectedUser = await userModel.findById(assignedUser);
-  if(!selectedUser) return next(new Error("Please enter valid assigned Id", { cause: 404 }));
-  
+  if (!selectedUser)
+    return next(new Error("Please enter valid assigned Id", { cause: 404 }));
+
   const newTask = await taskModel.updateOne(
     { _id: id },
     {
-      title, 
-      description, 
-      status, 
-      assignedUser
+      title,
+      description,
+      status,
+      assignedUser,
     },
     {
       new: true,
     }
   );
   return newTask.matchedCount
-    ? SuccessResponse(res, { message: "Done"}, 200 )
+    ? SuccessResponse(res, { message: "Done" }, 200)
     : next(new Error("In valid task id", { cause: 404 }));
 });
 export const deleteTask = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const reqUser = req.user;
   const task = await taskModel.findById({ _id: id });
-  if(!task) return next(new Error("In valid-id", { cause: 404 }));
-  if(task?.userId?.toString() != reqUser._id) return next(new Error("Only owner can delete this task", { cause: 404 }));
-  
+  if (!task) return next(new Error("In valid-id", { cause: 404 }));
+  if (task?.userId?.toString() != reqUser._id)
+    return next(new Error("Only owner can delete this task", { cause: 404 }));
+
   const deletedTask = await taskModel.deleteOne({ _id: id });
   return deletedTask.deletedCount
-    ? SuccessResponse(res, { message: "Done"}, 200 )
+    ? SuccessResponse(res, { message: "Done" }, 200)
     : next(new Error("In valid task id", { cause: 404 }));
 });
 
-
-export const getAllTasksForCurrentUser = asyncHandler(async (req, res, next) => {
-  const reqUser = req.user;
-  console.log("🚀 ~ file: task.js:80 ~ getAllTasksForCurrentUser ~ reqUser:", reqUser)
-  console.log("🚀 ~ file: task.js:80 ~ getAllTasksForCurrentUser ~ reqUser:", reqUser)
-  const tasks = await taskModel.find({
-   userId: reqUser._id
-  }).populate([{
-    path: "userId",
-    select: "userName email phone",
-  },
-  {
-    path: "assignedUser",
-    select: "userName email phone",
+export const getAllTasksForCurrentUser = asyncHandler(
+  async (req, res, next) => {
+    const reqUser = req.user;
+    const tasks = await taskModel
+      .find({
+        userId: reqUser._id,
+      })
+      .populate([
+        {
+          path: "userId",
+          select: "userName email phone",
+        },
+        {
+          path: "assignedUser",
+          select: "userName email phone",
+        },
+      ]);
+    return SuccessResponse(res, { message: "Done", tasks }, 200);
   }
-]);
+);
+
+export const getAllTasksForAnyUser = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const tasks = await taskModel
+    .find({
+      userId: id,
+    })
+    .populate([
+      {
+        path: "userId",
+        select: "userName email phone",
+      },
+      {
+        path: "assignedUser",
+        select: "userName email phone",
+      },
+    ]);
   return SuccessResponse(res, { message: "Done", tasks }, 200);
 });

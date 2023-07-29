@@ -54,7 +54,7 @@ export const login = asyncHandler(async (req, res, next) => {
     200
   );
 });
-
+// change password should be done through email
 export const changePassword = asyncHandler(async (req, res, next) => {
   const { password, email } = req.body;
   if (!password) {
