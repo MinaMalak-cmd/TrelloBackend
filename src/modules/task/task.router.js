@@ -7,7 +7,6 @@ const router = Router();
 router.post('/', handleAuth, taskController.addTask);
 router.get('/', taskController.getAllTasksWithUserData);
 router.put('/:id', handleAuth, taskController.updateTask);
-// router.delete('/:id', handleAuth, taskController.deleteUser);
-// router.delete('/soft-delete/:id', handleAuth, taskController.softDelete);
+router.delete('/:id', handleAuth, taskController.deleteTask);
 
 export default router;
