@@ -341,7 +341,6 @@ export const forgetPassword = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
   if(!email) return next(new Error("Please enter required fields", { cause: 404 }));
   const user = await userModel.findOne({ email});
-  console.log("🚀 ~ file: auth.js:345 ~ forgetPassword ~ user:", user, email)
   if(!user) return next(new Error("Please enter valid Email", { cause: 404 }));
   const token = jwt.sign({ email, id: user._id }, process.env.EMAIL_SIGNATURE, { expiresIn: 60 * 5 });
   const link = `http://localhost:4200/#/changePassword/${token}`;
