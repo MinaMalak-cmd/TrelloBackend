@@ -8,6 +8,7 @@ router.patch('/change-password', authController.changePassword);
 router.post('/login', authController.login);
 router.get('/confirm-email/:token', authController.confirmEmail);
 router.get('/new-confirm-email/:token', authController.newConfirmEmail);
-
+router.get('/unsubscribe/:token', authController.unSubscribe);
+router.post('/forget-password', authController.forgetPassword);
 
 export default router;
