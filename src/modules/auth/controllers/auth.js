@@ -3,8 +3,12 @@ import jwt from "jsonwebtoken";
 
 import userModel from "../../../../DB/models/user.model.js";
 import { asyncHandler, SuccessResponse } from "../../../utils/errorHandling.js";
+import sendEmail from "../../../utils/email.js";
 
 export const signup = asyncHandler(async (req, res, next) => {
+  const protocol = req.protocol;
+  const host = req.headers.host;
+
   const { userName, email, password, cPassword, age, gender, phone } = req.body;
   if (password != cPassword) {
     return next(new Error("Password Mismatch cPassword"));
@@ -28,8 +32,15 @@ export const signup = asyncHandler(async (req, res, next) => {
     gender,
     phone,
   });
+
+  const token = jwt.sign({ email : user.email, id: user._id}, process.env.EMAIL_SIGNATURE);
+  const link = `${protocol}://${host}/auth/confirm-email/${token}`;
+  const html = `<a href='${link}'>Confirm Email</a>`;
+  await sendEmail({ to : email, subject: "Confirm User Email", html})
+
   return SuccessResponse(res, { message: "Done", user }, 201);
 });
+
 export const login = asyncHandler(async (req, res, next) => {
   const { userName, password, email, phone } = req.body;
   const user = await userModel.findOne({
@@ -77,4 +88,11 @@ export const changePassword = asyncHandler(async (req, res, next) => {
   return user.matchedCount
     ? SuccessResponse(res, { message: "your password has been updated" }, 200)
     : next(new Error("In valid Email", { cause: 404 }));
+});
+
+export const confirmEmail = asyncHandler(async (req, res, next) => {
+  const { token } = req.params;
+  const decoded = jwt.verify(token, process.env.EMAIL_SIGNATURE);
+  const user = await userModel.findByIdAndUpdate(decoded.id, { confirmEmail : true}, { new : true});
+  return user ? res.redirect("http://localhost:4200/#/login") : res.send(`<a href="http://localhost:4200/#/signUp">Ops u look like don't have account yet to join us follow me now.</a>`)
 });
