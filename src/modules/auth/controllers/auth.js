@@ -154,7 +154,7 @@ export const login = asyncHandler(async (req, res, next) => {
     $or: [{ email }, { userName }, { phone }],
   });
   if (!user) {
-    return next(new Error("Email not exist", { cause: 404 }));
+    return next(new Error("User not exist", { cause: 404 }));
   }
   const match = bcrypt.compareSync(password, user.password);
   if (!match) {
