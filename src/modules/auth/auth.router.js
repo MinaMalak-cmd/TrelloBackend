@@ -5,7 +5,7 @@ import { validation } from "../../middlewares/validation.js";
 
 const router = Router();
 
-router.post("/signup", authController.signup);
+router.post("/signup", validation(validators.signup), authController.signup);
 router.patch("/change-password", authController.changePassword);
 router.post("/login", validation(validators.login), authController.login);
 router.get("/confirm-email/:token", authController.confirmEmail);
