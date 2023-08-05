@@ -1,8 +1,7 @@
 import Joi from 'joi';
 
-export const signup = 
-// {
-    // body : 
+export const signup = {
+    body : 
         Joi.object({
             userName : Joi.string().min(3).max(100).pattern(new RegExp(/[A-Z][a-zA-Z][^#&<>\"~;$^%{}?]{1,20}/)).required(),
             email : Joi.string().email({ tlds: { allow: ['com', 'net', 'eg', 'gov', 'edu']} }).required(),
@@ -13,15 +12,12 @@ export const signup =
             gender : Joi.string().valid('male', 'female'),
             confirmEmail: Joi.boolean().truthy("1").falsy("0").sensitive(),
             coverImages : Joi.array().items(Joi.string()),
-
-            //params 
-            flag: Joi.boolean().required()
         // }).required().options({allowUnknown:true});
         }).required()
     // params: Joi.object({
     //     flag: Joi.boolean().required()
     // }).required()
-// }
+}
 
 
 export const login = Joi.object({
