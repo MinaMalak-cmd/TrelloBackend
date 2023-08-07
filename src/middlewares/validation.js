@@ -1,6 +1,6 @@
 const dataMethods = ['body', 'params', 'query', 'headers', 'file', 'files'];
 
-export const validation = (JoiSchema) =>{
+export const validation = (JoiSchema) => {
     return (req, res, next) => {
         const validationErr = [];
         dataMethods.forEach(key => {
