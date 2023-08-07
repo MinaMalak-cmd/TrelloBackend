@@ -28,3 +28,17 @@ export const login = {
         password : Joi.string().pattern(new RegExp(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/)).required(),
     }).required().xor('email', 'userName', 'phone')
 }
+
+export const changePassword = {
+    body : Joi.object({
+        email : Joi.string().email({ minDomainSegments: 2, maxDomainSegments: 4 ,tlds: { allow: ['com', 'net', 'eg', 'gov', 'edu']} }).required(),
+        password : Joi.string().pattern(new RegExp(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/)).required(),
+    }).required()
+}
+
+export const forgetPassword = {
+    body : Joi.object({
+        email : Joi.string().email({ minDomainSegments: 2, maxDomainSegments: 4 ,tlds: { allow: ['com', 'net', 'eg', 'gov', 'edu']} }).required(),
+        password : Joi.string().pattern(new RegExp(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/)).required(),
+    }).required()
+}
