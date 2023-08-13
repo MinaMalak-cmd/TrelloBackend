@@ -14,9 +14,8 @@ bootstrap(app, express);
 
 croneOne();
 croneTwo();
-
-// gracefulShutdown();
-
 croneThree();
+
+gracefulShutdown();
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

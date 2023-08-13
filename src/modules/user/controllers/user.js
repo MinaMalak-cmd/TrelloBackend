@@ -10,6 +10,8 @@ export const getAllUsers = asyncHandler(async (req, res, next) => {
         phone: 1,
         age: 1,
         _id: 1,
+        profilePic : 1,
+        coverPictures : 1
       }
     );
     return SuccessResponse(res, { message: "Done", users }, 200);
@@ -78,6 +80,27 @@ export const getUserProfile = asyncHandler(async (req, res, next) => {
 //     return res.json({ message: "Catch error" });
 //   }
 // };
+
+export const profilePic = asyncHandler(async (req, res, next) => {
+  const { _id } = req.user;
+  if(!req.file){
+    return next(new Error('Please upload profile picture', { cause: 400 }))
+  }
+  const user = await userModel.findByIdAndUpdate(
+    _id,
+    {
+      profilePic : req.file.path
+    },
+    {
+      new : true
+    }
+  )
+  console.log("🚀 ~ file: user.js:84 ~ profilePic ~ _id:", _id, req.file, user);
+
+  return user
+      ? SuccessResponse(res, { user }, 200 )
+      : next(new Error("Can't upload profile pic", { cause: 404 }));
+});
 
 export const updateUser = asyncHandler(async (req, res, next) => {
     const { id } = req.params;

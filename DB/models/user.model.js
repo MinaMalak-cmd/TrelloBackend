@@ -29,7 +29,9 @@ const userSchema = new Schema({
   isDeleted: {
     type : Boolean, 
     default: false,
-  }
+  },
+  profilePic : String,
+  coverPictures : [String]
 }, {
   timestamps:true
 });
