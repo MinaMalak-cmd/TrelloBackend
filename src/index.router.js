@@ -10,10 +10,13 @@ const bootstrap = async (app, express) => {
   // Database connection and seeding
   await connectDB();
 
+  // app.use('/uploads', express.static('./uploads')) // for development purposes only
+
   //Setup App Routing
   app.use("/auth", authRouter);
   app.use("/user", userRouter);
   app.use("/task", taskRouter);
+
   app.use("*", (req, res, next) => {
     return res.json({ message: "In-valid Routing" });
   });

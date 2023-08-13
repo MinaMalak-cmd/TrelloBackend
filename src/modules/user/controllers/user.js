@@ -83,6 +83,7 @@ export const getUserProfile = asyncHandler(async (req, res, next) => {
 
 export const profilePic = asyncHandler(async (req, res, next) => {
   const { _id } = req.user;
+  console.log("🚀 ~ file: user.js:87 ~ profilePic ~ req.file:", req.file, req.files)
   if(!req.file){
     return next(new Error('Please upload profile picture', { cause: 400 }))
   }
@@ -95,7 +96,6 @@ export const profilePic = asyncHandler(async (req, res, next) => {
       new : true
     }
   )
-  console.log("🚀 ~ file: user.js:84 ~ profilePic ~ _id:", _id, req.file, user);
 
   return user
       ? SuccessResponse(res, { user }, 200 )

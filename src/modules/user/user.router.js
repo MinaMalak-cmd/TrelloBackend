@@ -9,7 +9,11 @@ const router = Router();
 
 router.get('/', userController.getAllUsers);
 router.get('/profile', handleAuth, userController.getUserProfile);
-router.patch('/profile', handleAuth, multerUploadLocally().single('file'), userController.profilePic);
+// router.put('/profile', handleAuth, multerUploadLocally('profile').single('file'), userController.profilePic);
+router.put('/profile', handleAuth, multerUploadLocally('profile').fields([
+    {name : 'profile', maxCount : 1 }, 
+    {name : 'cover', maxCount : 4 }
+]), userController.profilePic);
 router.put('/update/:id', validation(validators.updateUser) ,handleAuth, userController.updateUser);
 router.delete('/:id', handleAuth, userController.deleteUser);
 router.delete('/soft-delete/:id', handleAuth, userController.softDelete);
