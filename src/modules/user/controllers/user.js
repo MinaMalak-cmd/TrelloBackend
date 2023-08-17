@@ -103,23 +103,32 @@ export const updateProfilePic = asyncHandler(async (req, res, next) => {
 
 export const updateCoverPictures = asyncHandler(async (req, res, next) => {
   const { _id } = req.user;
-  console.log("🚀 ~ file: user.js:106 ~ updateCoverPictures ~ req.user:", req.user, req.user?.coverPictures)
-  // if(!req.file){
-  //   return next(new Error('Please upload profile picture', { cause: 400 }))
-  // }
-  // const user = await userModel.findByIdAndUpdate(
-  //   _id,
-  //   {
-  //     profilePic : req.file.path
-  //   },
-  //   {
-  //     new : true
-  //   }
-  // )
 
-  // return user
-  //     ? SuccessResponse(res, { user }, 200 )
-  //     : next(new Error("Can't upload profile pic", { cause: 404 }));
+  if(!req.files?.cover){
+    return next(new Error('Please upload pictures', { cause: 400 }))
+  }
+  const user = await userModel.findById(_id);
+  if(!user){
+    return next(new Error('User not existed', { cause: 400 }))
+  }
+  const coverImages = [];
+  for (let i = 0; i < req.files.cover.length; i++) {
+    coverImages.push(req.files.cover[i].path)
+  }
+  user.coverPictures.length ? coverImages.push(...user.coverPictures) : coverImages;
+  const newUser = await userModel.findByIdAndUpdate(
+    _id,
+    {
+      coverPictures : coverImages
+    },
+    {
+      new : true
+    }
+  )
+
+  return newUser
+      ? SuccessResponse(res, { newUser }, 200 )
+      : next(new Error("Can't upload cover pic", { cause: 404 }));
 });
 
 export const updateUser = asyncHandler(async (req, res, next) => {

@@ -19,7 +19,7 @@ const handleAuth = asyncHandler(async (req, res, next) => {
   if (!decoded?.id) {
     return next(new Error("In-valid  token payload", { cause: 400 }));
   }
-  const user = await userModel.findById(decoded.id).select("userName email role coverPictures");
+  const user = await userModel.findById(decoded.id).select("userName email role");
   if (!user) {
       return next(new Error("Not register account", { cause: 401 }));
     }

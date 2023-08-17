@@ -15,7 +15,10 @@ router.get('/profile', handleAuth, userController.getUserProfile);
 //     {name : 'cover', maxCount : 4 }
 // ]), userController.profilePic); //gets an error
 router.patch('/profile', handleAuth, multerUploadLocally(allowedExtensions.Image,'User/Profile').single('profile'), userController.updateProfilePic);
-router.patch('/cover', handleAuth, userController.updateCoverPictures);
+router.patch('/cover', handleAuth, multerUploadLocally(allowedExtensions.Image,'User/Cover').fields([
+        {name : 'cover', maxCount : 4 }, 
+        {name : 'image', maxCount : 1 }
+    ]), userController.updateCoverPictures);
 router.put('/update/:id', validation(validators.updateUser) ,handleAuth, userController.updateUser);
 router.delete('/:id', handleAuth, userController.deleteUser);
 router.delete('/soft-delete/:id', handleAuth, userController.softDelete);
