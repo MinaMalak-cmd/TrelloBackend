@@ -131,6 +131,21 @@ export const updateCoverPictures = asyncHandler(async (req, res, next) => {
       : next(new Error("Can't upload cover pic", { cause: 404 }));
 });
 
+export const deleteCoverPictures = asyncHandler(async (req, res, next) => {
+  const { _id } = req.user;
+  // there is a more simple way but this to try new approach
+
+  const user = await userModel.findById(_id);
+  if(!user){
+    return next(new Error('User not existed', { cause: 400 }))
+  }
+  user.coverPictures = [];
+  await user.save();
+  return user
+      ? SuccessResponse(res, { user }, 200 )
+      : next(new Error("Can't delete cover pic", { cause: 404 }));
+});
+
 export const updateUser = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const { userName, age, phone } = req.body;

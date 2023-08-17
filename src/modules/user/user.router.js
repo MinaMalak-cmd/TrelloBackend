@@ -19,6 +19,7 @@ router.patch('/cover', handleAuth, multerUploadLocally(allowedExtensions.Image,'
         {name : 'cover', maxCount : 4 }, 
         {name : 'image', maxCount : 1 }
     ]), userController.updateCoverPictures);
+router.patch('/cover-delete', handleAuth, userController.deleteCoverPictures);
 router.put('/update/:id', validation(validators.updateUser) ,handleAuth, userController.updateUser);
 router.delete('/:id', handleAuth, userController.deleteUser);
 router.delete('/soft-delete/:id', handleAuth, userController.softDelete);
