@@ -24,8 +24,8 @@ const taskSchema = new Schema({
   assignedUser : {
     type: Types.ObjectId,
     ref: "User"
-  }
-
+  },
+  attachments : [String]
 }, {
   timestamps:true
 });

@@ -65,6 +65,26 @@ export const updateTask = asyncHandler(async (req, res, next) => {
     ? SuccessResponse(res, { message: "Done" }, 200)
     : next(new Error("In valid task id", { cause: 404 }));
 });
+export const uploadTaskAttachment = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  console.log("🚀 ~ file: task.js:70 ~ uploadTaskAttachment ~ id:", id);
+  const task = await taskModel.findById(id);
+  console.log("🚀 ~ file: task.js:72 ~ uploadTaskAttachment ~ task:", task)
+  if(!task) return next(new Error("Please enter valid Task Id", { cause: 400 }));
+
+  const attachments = [];
+  for (let i = 0; i < req.files.attachment.length; i++) {
+    attachments.push(req.files.attachment[i].path)
+  }
+  task.attachments.length ? attachments.push(...task.attachments) : attachments;
+  task.attachments = attachments;
+  await task.save();
+
+  return task 
+      ? SuccessResponse(res, { task }, 200 )
+      : next(new Error("Can't upload attachment", { cause: 404 }));
+ 
+});
 export const deleteTask = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const reqUser = req.user;
