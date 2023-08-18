@@ -66,21 +66,40 @@ export const updateTask = asyncHandler(async (req, res, next) => {
     : next(new Error("In valid task id", { cause: 404 }));
 });
 export const uploadTaskAttachment = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const task = await taskModel.findById(id);
-  if(!task) return next(new Error("Please enter valid Task Id", { cause: 400 }));
-
-  const attachments = [];
-  for (let i = 0; i < req.files.attachment.length; i++) {
-    attachments.push(req.files.attachment[i].path)
+  try {
+    
+    console.log("🚀 ~ file: task.js:69 ~ uploadTaskAttachment ~ req:", req.files, req.file)
+    const reqAttachments = req.files.attachment;
+    const { id } = req.params;
+    const task = await taskModel.findById(id);
+    if(!task) return next(new Error("Please enter valid Task Id", { cause: 400 }));
+  
+    const attachments = [];
+    const publicIds = [];
+    for (let i = 0; i < reqAttachments.length; i++) {
+      console.log("🚀 ~ file: task.js:76 ~ uploadTaskAttachment ~ reqAttachments:", reqAttachments[i])
+      const { secure_url, public_id } = await cloudinary.uploader.upload(
+        reqAttachments[i].path,
+        {
+          folder: `Task/Attahcment/${id}`,
+          // resource_type : 'image'
+        }
+      )
+      console.log("🚀 ~ file: task.js:85 ~ uploadTaskAttachment ~ secure_url, public_id:", secure_url, public_id)
+      publicIds.push(public_id);
+      attachments.push({ secure_url, public_id });
+    }
+    task.attachments?.length ? attachments?.push(...task.attachments) : attachments;
+    task.attachments = attachments;
+    await task.save();
+  
+    return task 
+        ? SuccessResponse(res, { task }, 200 )
+        : next(new Error("Can't upload attachment", { cause: 404 }));
+  } catch (error) {
+    console.log("🚀 ~ file: task.js:99 ~ uploadTaskAttachment ~ error:", error)
+    
   }
-  task.attachments.length ? attachments.push(...task.attachments) : attachments;
-  task.attachments = attachments;
-  await task.save();
-
-  return task 
-      ? SuccessResponse(res, { task }, 200 )
-      : next(new Error("Can't upload attachment", { cause: 404 }));
  
 });
 export const deleteTask = asyncHandler(async (req, res, next) => {

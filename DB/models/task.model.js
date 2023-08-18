@@ -25,7 +25,10 @@ const taskSchema = new Schema({
     type: Types.ObjectId,
     ref: "User"
   },
-  attachments : [String]
+  attachments : [{
+    secure_url: String,
+    public_id: String,
+  }]
 }, {
   timestamps:true
 });
