@@ -1,5 +1,6 @@
 import userModel from "../../../../DB/models/user.model.js";
 import { asyncHandler, SuccessResponse } from "../../../utils/errorHandling.js";
+import cloudinary from "../../../utils/cloudinaryConfigurations.js";
 
 export const getAllUsers = asyncHandler(async (req, res, next) => {
     const users = await userModel.find(
@@ -82,25 +83,31 @@ export const getUserProfile = asyncHandler(async (req, res, next) => {
 // };
 
 export const updateProfilePic = asyncHandler(async (req, res, next) => {
-  console.log("🚀 ~ file: user.js:85 ~ updateProfilePic ~ req:", req.file, req.files)
   const { _id } = req.user;
-  const profile = req.files.profile;
+  const profile = req.files?.profile;
   if(!profile){
     return next(new Error('Please upload profile picture', { cause: 400 }))
   }
+  const { secure_url, public_id } = cloudinary.uploader.upload(profile[0].path, {
+    folder: `Users/Profiles/${_id}`,
+    resource_type : 'image'
+  })
+  console.log("🚀 ~ file: user.js:95 ~ updateProfilePic ~ secure_url, public_id:", secure_url, public_id)
   const user = await userModel.findByIdAndUpdate(
     _id,
     {
-      profilePic : profile[0].path
+      profilePic : { secure_url, public_id }
     },
     {
       new : true
     }
   )
-
-  return user
-      ? SuccessResponse(res, { user }, 200 )
-      : next(new Error("Can't upload profile pic", { cause: 404 }));
+  if (!user) {
+    await cloudinary.uploader.destroy(public_id)
+    // await cloudinary.api.delete_resources([publibIds])  // delete bulk of publicIds
+    return next(new Error("Can't upload profile pic", { cause: 400 }))
+  }
+  return SuccessResponse(res, { user }, 200 )
 });
 
 export const updateCoverPictures = asyncHandler(async (req, res, next) => {

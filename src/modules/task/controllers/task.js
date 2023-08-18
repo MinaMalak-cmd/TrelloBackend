@@ -67,9 +67,7 @@ export const updateTask = asyncHandler(async (req, res, next) => {
 });
 export const uploadTaskAttachment = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  console.log("🚀 ~ file: task.js:70 ~ uploadTaskAttachment ~ id:", id);
   const task = await taskModel.findById(id);
-  console.log("🚀 ~ file: task.js:72 ~ uploadTaskAttachment ~ task:", task)
   if(!task) return next(new Error("Please enter valid Task Id", { cause: 400 }));
 
   const attachments = [];

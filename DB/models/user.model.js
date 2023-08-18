@@ -30,8 +30,18 @@ const userSchema = new Schema({
     type : Boolean, 
     default: false,
   },
-  profilePic : String,
-  coverPictures : [String]
+  // profilePic : String,
+  // coverPictures : [String]
+  profile_pic: {
+    secure_url: String,
+    public_id: String,
+  },
+  coverPictures: [
+  {
+    secure_url: String,
+    public_id: String,
+  },
+  ],
 }, {
   timestamps:true
 });
