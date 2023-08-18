@@ -82,14 +82,16 @@ export const getUserProfile = asyncHandler(async (req, res, next) => {
 // };
 
 export const updateProfilePic = asyncHandler(async (req, res, next) => {
+  console.log("🚀 ~ file: user.js:85 ~ updateProfilePic ~ req:", req.file, req.files)
   const { _id } = req.user;
-  if(!req.file){
+  const profile = req.files.profile;
+  if(!profile){
     return next(new Error('Please upload profile picture', { cause: 400 }))
   }
   const user = await userModel.findByIdAndUpdate(
     _id,
     {
-      profilePic : req.file.path
+      profilePic : profile[0].path
     },
     {
       new : true

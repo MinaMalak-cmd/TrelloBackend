@@ -10,11 +10,10 @@ const router = Router();
 
 router.get('/', userController.getAllUsers);
 router.get('/profile', handleAuth, userController.getUserProfile);
-// router.put('/profile', handleAuth, multerUploadLocally('profile').fields([
-//     {name : 'profile', maxCount : 1 }, 
-//     {name : 'cover', maxCount : 4 }
-// ]), userController.profilePic); //gets an error
-router.patch('/profile', handleAuth, multerUploadLocally(allowedExtensions.Image,'User/Profile').single('profile'), userController.updateProfilePic);
+router.patch('/profile', handleAuth, multerUploadLocally(allowedExtensions.Image,'User/Test/Profile').fields([
+    {name : 'profile', maxCount : 1 }, 
+    {name : 'cover', maxCount : 4 }
+]), userController.updateProfilePic); //gets an error
 router.patch('/cover', handleAuth, multerUploadLocally(allowedExtensions.Image,'User/Cover').fields([
         {name : 'cover', maxCount : 4 }, 
         {name : 'image', maxCount : 1 }
