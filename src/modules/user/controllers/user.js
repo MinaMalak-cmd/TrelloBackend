@@ -1,6 +1,7 @@
 import userModel from "../../../../DB/models/user.model.js";
 import { asyncHandler, SuccessResponse } from "../../../utils/errorHandling.js";
 import cloudinary from "../../../utils/cloudinaryConfigurations.js";
+import { generateQrCode } from "../../../utils/qrCodeUtil.js";
 
 export const getAllUsers = asyncHandler(async (req, res, next) => {
     const users = await userModel.find(
@@ -24,6 +25,17 @@ export const getUserProfile = asyncHandler(async (req, res, next) => {
     return user
       ? SuccessResponse(res, { message: "Done", user }, 200) 
       : SuccessResponse(res, { message: "Not valid Id" }, 200);
+});
+
+export const getUserData = asyncHandler(async (req, res, next) => {
+  const { _id } = req.params
+  const user = await userModel.findById(_id, 'userName');
+  console.log("🚀 ~ file: user.js:32 ~ getUserData ~ user:", user)
+  if (!user) {
+    return next(new Error('in-valid userId', { cause: 400 }))
+  }
+  const qrcode = await generateQrCode({ data : user})
+  return SuccessResponse(res, { message: "Done", user, qrcode }, 200) 
 });
 
 // export const getByNameAndAge = async (req, res, next) => {

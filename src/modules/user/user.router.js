@@ -10,6 +10,8 @@ import { allowedExtensions } from '../../utils/allowedExtensions.js';
 const router = Router();
 
 router.get('/', userController.getAllUsers);
+router.get('/:_id', userController.getUserData);
+
 router.get('/profile', handleAuth, userController.getUserProfile);
 // router.patch('/profile', handleAuth, multerUploadLocally(allowedExtensions.Image,'User/Test/Profile').fields([
 //     {name : 'profile', maxCount : 1 }, 
