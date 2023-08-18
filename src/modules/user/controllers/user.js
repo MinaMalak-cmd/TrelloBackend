@@ -83,61 +83,89 @@ export const getUserProfile = asyncHandler(async (req, res, next) => {
 // };
 
 export const updateProfilePic = asyncHandler(async (req, res, next) => {
-  const { _id } = req.user;
-  const profile = req.files?.profile;
-  if(!profile){
-    return next(new Error('Please upload profile picture', { cause: 400 }))
-  }
-  const { secure_url, public_id } = cloudinary.uploader.upload(profile[0].path, {
-    folder: `Users/Profiles/${_id}`,
-    resource_type : 'image'
-  })
-  console.log("🚀 ~ file: user.js:95 ~ updateProfilePic ~ secure_url, public_id:", secure_url, public_id)
-  const user = await userModel.findByIdAndUpdate(
-    _id,
-    {
-      profilePic : { secure_url, public_id }
-    },
-    {
-      new : true
+  try{
+    const { _id } = req.user;
+    const profile = req.files?.profile;
+    if(!profile){
+      return next(new Error('Please upload profile picture', { cause: 400 }))
     }
-  )
-  if (!user) {
-    await cloudinary.uploader.destroy(public_id)
-    // await cloudinary.api.delete_resources([publibIds])  // delete bulk of publicIds
-    return next(new Error("Can't upload profile pic", { cause: 400 }))
+    console.log("🚀 ~ file: user.js:95 ~ updateProfilePic ~ secure_url, public_id:", profile[0].path)
+  
+    const { secure_url, public_id } = await cloudinary.uploader.upload(
+      profile[0].path, 
+      {
+        folder: `Users/Profiles/${_id}`,
+        resource_type : 'image'
+      }
+    )
+    console.log("🚀 ~ file: user.js:95 ~ updateProfilePic ~ secure_url, public_id:", secure_url, public_id, profile[0].path)
+    const user = await userModel.findByIdAndUpdate(
+      _id,
+      {
+        profilePic : { secure_url, public_id }
+      },
+      {
+        new : true
+      }
+    )
+    if (!user) {
+      await cloudinary.uploader.destroy(public_id)
+      // await cloudinary.api.delete_resources([publibIds])  // delete bulk of publicIds
+      return next(new Error("Can't upload profile pic", { cause: 400 }))
+    }
+    return SuccessResponse(res, { user }, 200 )
+
+  }catch(e){
+    console.log("🚀 ~ file: user.js:119 ~ updateProfilePic ~ e:", e)  
+    // error self signed certificate in certificate chain
   }
-  return SuccessResponse(res, { user }, 200 )
 });
 
 export const updateCoverPictures = asyncHandler(async (req, res, next) => {
-  const { _id } = req.user;
-
-  if(!req.files?.cover){
-    return next(new Error('Please upload pictures', { cause: 400 }))
-  }
-  const user = await userModel.findById(_id);
-  if(!user){
-    return next(new Error('User not existed', { cause: 400 }))
-  }
-  const coverImages = [];
-  for (let i = 0; i < req.files.cover.length; i++) {
-    coverImages.push(req.files.cover[i].path)
-  }
-  user.coverPictures.length ? coverImages.push(...user.coverPictures) : coverImages;
-  const newUser = await userModel.findByIdAndUpdate(
-    _id,
-    {
-      coverPictures : coverImages
-    },
-    {
-      new : true
+  try{
+    const { _id } = req.user;
+    if(!req.files?.cover){
+      return next(new Error('Please upload pictures', { cause: 400 }))
     }
-  )
-
-  return newUser
-      ? SuccessResponse(res, { newUser }, 200 )
-      : next(new Error("Can't upload cover pic", { cause: 404 }));
+    const user = await userModel.findById(_id);
+    if(!user){
+      return next(new Error('User not existed', { cause: 400 }))
+    }
+    const coverImages = [];
+    const publicIds = [];
+    for (let i = 0; i < req.files.cover.length; i++) {
+      const { secure_url, public_id } = await cloudinary.uploader.upload(
+        req.files.cover[i].path,
+        {
+          folder: `Users/Covers/${_id}`,
+          resource_type : 'image'
+        }
+      )
+      publicIds.push(public_id);
+      coverImages.push({ secure_url, public_id });
+    }
+    user.coverPictures.length ? coverImages.push(...user.coverPictures) : coverImages;
+    const newUser = await userModel.findByIdAndUpdate(
+      _id,
+      {
+        coverPictures : coverImages
+      },
+      {
+        new : true
+      }
+    )
+    if (!newUser) {
+      await cloudinary.api.delete_resources(publicIds)  // delete bulk of publicIds
+      return next(new Error("Can't upload Cover pic", { cause: 400 }))
+    }
+    return SuccessResponse(res, { newUser }, 200 )
+  }catch(e){
+    return res.status(400).json({
+      errMsg: e.message,
+      stack: e.stack,
+      e
+    })
+  }
 });
 
 export const deleteCoverPictures = asyncHandler(async (req, res, next) => {
@@ -148,6 +176,9 @@ export const deleteCoverPictures = asyncHandler(async (req, res, next) => {
   if(!user){
     return next(new Error('User not existed', { cause: 400 }))
   }
+  const publicIds = user.coverPictures?.map(cover => cover.public_id);
+  await cloudinary.api.delete_resources(publicIds)  // delete bulk of publicIds
+
   user.coverPictures = [];
   await user.save();
   return user
