@@ -101,8 +101,7 @@ export const updateProfilePic = asyncHandler(async (req, res, next) => {
     if(!profile){
       return next(new Error('Please upload profile picture', { cause: 400 }))
     }
-    console.log("🚀 ~ file: user.js:95 ~ updateProfilePic ~ secure_url, public_id:", profile[0].path)
-  
+
     const { secure_url, public_id } = await cloudinary.uploader.upload(
       profile[0].path, 
       {
@@ -110,7 +109,6 @@ export const updateProfilePic = asyncHandler(async (req, res, next) => {
         resource_type : 'image'
       }
     )
-    console.log("🚀 ~ file: user.js:95 ~ updateProfilePic ~ secure_url, public_id:", secure_url, public_id, profile[0].path)
     const user = await userModel.findByIdAndUpdate(
       _id,
       {

@@ -2,10 +2,13 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 import { allowedExtensions } from "../utils/allowedExtensions.js";
+import { fileURLToPath } from 'url';
+const __dirname = fileURLToPath(import.meta.url)
 
 export const multerUploadLocally = (allowedExtensionsArr=allowedExtensions.Image, customPath="General") => {
 
-  const destPath = path.resolve(`uploads/${customPath}`);
+  // const destPath = path.resolve(`uploads/${customPath}`);
+  const destPath = path.join(__dirname,`../../uploads/${customPath}`); // to save inside nested folder 
 
   //================================== Custom Path =============================
   if (!fs.existsSync(destPath)) {
