@@ -30,7 +30,6 @@ export const getUserProfile = asyncHandler(async (req, res, next) => {
 export const getUserData = asyncHandler(async (req, res, next) => {
   const { _id } = req.params
   const user = await userModel.findById(_id, 'userName');
-  console.log("🚀 ~ file: user.js:32 ~ getUserData ~ user:", user)
   if (!user) {
     return next(new Error('in-valid userId', { cause: 400 }))
   }
@@ -95,40 +94,51 @@ export const getUserData = asyncHandler(async (req, res, next) => {
 // };
 
 export const updateProfilePic = asyncHandler(async (req, res, next) => {
-  try{
+  // try{
     const { _id } = req.user;
     const profile = req.files?.profile;
     if(!profile){
       return next(new Error('Please upload profile picture', { cause: 400 }))
     }
-
+    
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // this is not a best practice
     const { secure_url, public_id } = await cloudinary.uploader.upload(
       profile[0].path, 
       {
-        folder: `Users/Profiles/${_id}`,
+        folder: `Users/Profiles/${_id}/Profile`,
         resource_type : 'image'
       }
     )
-    const user = await userModel.findByIdAndUpdate(
-      _id,
-      {
-        profilePic : { secure_url, public_id }
-      },
-      {
-        new : true
-      }
-    )
+    // const user = await userModel.findByIdAndUpdate(
+    //   _id,
+    //   {
+    //     profile_pic : { secure_url, public_id }
+    //   },
+    //   {
+    //     new : true
+    //   }
+    // )
+    const user = await userModel.findById(_id);
     if (!user) {
       await cloudinary.uploader.destroy(public_id)
-      // await cloudinary.api.delete_resources([publibIds])  // delete bulk of publicIds
       return next(new Error("Can't upload profile pic", { cause: 400 }))
     }
+    let exisitingPublicId = user?.profile_pic?.public_id;
+
+    if(exisitingPublicId){
+      await cloudinary.uploader.destroy(exisitingPublicId);
+    }
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "1"; // you have to close this after finishing working with cloudinary
+    
+    user.profile_pic = { secure_url, public_id };
+    await user.save();
+    
     return SuccessResponse(res, { user }, 200 )
 
-  }catch(e){
-    console.log("🚀 ~ file: user.js:119 ~ updateProfilePic ~ e:", e)  
-    // error self signed certificate in certificate chain
-  }
+  // }catch(e){
+  //   console.log("🚀 ~ file: user.js:119 ~ updateProfilePic ~ e:", e)  
+  //   // error self signed certificate in certificate chain
+  // }
 });
 
 export const updateCoverPictures = asyncHandler(async (req, res, next) => {

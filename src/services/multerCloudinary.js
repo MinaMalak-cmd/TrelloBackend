@@ -1,10 +1,7 @@
 import multer from "multer";
 import { allowedExtensions } from "../utils/allowedExtensions.js";
 
-export const multerCloudUpload = (allowedExtensionsArr) => {
-  if (!allowedExtensionsArr) {
-    allowedExtensionsArr = allowedExtensions.Image;
-  }
+export const multerCloudUpload = (allowedExtensionsArr = allowedExtensions.Image) => {
 
   //================================== Storage =============================
   const storage = multer.diskStorage({});
