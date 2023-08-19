@@ -12,8 +12,8 @@ export const getAllUsers = asyncHandler(async (req, res, next) => {
         phone: 1,
         age: 1,
         _id: 1,
-        profilePic : 1,
-        coverPictures : 1
+        profile_pic : 1,
+        cover_pictures : 1
       }
     );
     return SuccessResponse(res, { message: "Done", users }, 200);
@@ -153,22 +153,24 @@ export const updateCoverPictures = asyncHandler(async (req, res, next) => {
     }
     const coverImages = [];
     const publicIds = [];
-    for (let i = 0; i < req.files.cover.length; i++) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; 
+    let cover = req.files.cover;
+    for (let i = 0; i < cover.length; i++) {
       const { secure_url, public_id } = await cloudinary.uploader.upload(
-        req.files.cover[i].path,
+        cover[i].path,
         {
-          folder: `Users/Covers/${_id}`,
+          folder: `Users/Profiles/${_id}/Cover`,
           resource_type : 'image'
         }
       )
       publicIds.push(public_id);
       coverImages.push({ secure_url, public_id });
     }
-    user.coverPictures.length ? coverImages.push(...user.coverPictures) : coverImages;
+    user.cover_pictures.length ? coverImages.push(...user.cover_pictures) : coverImages;
     const newUser = await userModel.findByIdAndUpdate(
       _id,
       {
-        coverPictures : coverImages
+        cover_pictures : coverImages
       },
       {
         new : true
@@ -178,6 +180,7 @@ export const updateCoverPictures = asyncHandler(async (req, res, next) => {
       await cloudinary.api.delete_resources(publicIds)  // delete bulk of publicIds
       return next(new Error("Can't upload Cover pic", { cause: 400 }))
     }
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "1"; 
     return SuccessResponse(res, { newUser }, 200 )
   }catch(e){
     return res.status(400).json({
@@ -189,21 +192,35 @@ export const updateCoverPictures = asyncHandler(async (req, res, next) => {
 });
 
 export const deleteCoverPictures = asyncHandler(async (req, res, next) => {
-  const { _id } = req.user;
-  // there is a more simple way but this to try new approach
+  try{
 
-  const user = await userModel.findById(_id);
-  if(!user){
-    return next(new Error('User not existed', { cause: 400 }))
+    const { _id } = req.user;
+    // there is a more simple way but this to try new approach
+
+    const user = await userModel.findById(_id);
+    if(!user){
+      return next(new Error('User not existed', { cause: 400 }))
+    }
+    const publicIds = user.cover_pictures?.map(cover => cover.public_id);
+
+    if(publicIds.length > 0){
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; 
+  
+      await cloudinary.api.delete_resources(publicIds)  // delete bulk of publicIds
+      
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "1"; 
+  
+      user.cover_pictures = [];
+      await user.save();
+    }
+    return user
+        ? SuccessResponse(res, { user }, 200 )
+        : next(new Error("Can't delete cover pic", { cause: 404 }));
+    
+  }catch(e){
+    console.log("🚀 ~ file: user.js:119 ~ updateProfilePic ~ e:", e)  
+    // error self signed certificate in certificate chain
   }
-  const publicIds = user.coverPictures?.map(cover => cover.public_id);
-  await cloudinary.api.delete_resources(publicIds)  // delete bulk of publicIds
-
-  user.coverPictures = [];
-  await user.save();
-  return user
-      ? SuccessResponse(res, { user }, 200 )
-      : next(new Error("Can't delete cover pic", { cause: 404 }));
 });
 
 export const updateUser = asyncHandler(async (req, res, next) => {

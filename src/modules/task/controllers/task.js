@@ -68,7 +68,6 @@ export const updateTask = asyncHandler(async (req, res, next) => {
 export const uploadTaskAttachment = asyncHandler(async (req, res, next) => {
   try {
     
-    console.log("🚀 ~ file: task.js:69 ~ uploadTaskAttachment ~ req:", req.files, req.file)
     const reqAttachments = req.files.attachment;
     const { id } = req.params;
     const task = await taskModel.findById(id);
@@ -77,7 +76,6 @@ export const uploadTaskAttachment = asyncHandler(async (req, res, next) => {
     const attachments = [];
     const publicIds = [];
     for (let i = 0; i < reqAttachments.length; i++) {
-      console.log("🚀 ~ file: task.js:76 ~ uploadTaskAttachment ~ reqAttachments:", reqAttachments[i])
       const { secure_url, public_id } = await cloudinary.uploader.upload(
         reqAttachments[i].path,
         {
@@ -85,7 +83,6 @@ export const uploadTaskAttachment = asyncHandler(async (req, res, next) => {
           // resource_type : 'image'
         }
       )
-      console.log("🚀 ~ file: task.js:85 ~ uploadTaskAttachment ~ secure_url, public_id:", secure_url, public_id)
       publicIds.push(public_id);
       attachments.push({ secure_url, public_id });
     }
@@ -97,7 +94,6 @@ export const uploadTaskAttachment = asyncHandler(async (req, res, next) => {
         ? SuccessResponse(res, { task }, 200 )
         : next(new Error("Can't upload attachment", { cause: 404 }));
   } catch (error) {
-    console.log("🚀 ~ file: task.js:99 ~ uploadTaskAttachment ~ error:", error)
     
   }
  

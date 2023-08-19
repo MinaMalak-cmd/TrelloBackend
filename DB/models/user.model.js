@@ -36,7 +36,7 @@ const userSchema = new Schema({
     secure_url: String,
     public_id: String,
   },
-  coverPictures: [
+  cover_pictures: [
   {
     secure_url: String,
     public_id: String,
